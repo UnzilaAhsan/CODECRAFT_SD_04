@@ -1,0 +1,121 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+const int SIZE = 9;
+int grid[SIZE][SIZE];
+
+void Grid()
+
+{
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
+            grid[i][j] = 0;
+}
+
+bool isSafe(int row, int col, int num)
+{
+    for (int i = 0; i < SIZE; i++)
+        if (grid[row][i] == num) return false;
+
+    for (int i = 0; i < SIZE; i++)
+        if (grid[i][col] == num) return false;
+
+    int startRow = (row / 3) * 3, startCol = (col / 3) * 3;
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (grid[startRow + i][startCol + j] == num) return false;
+
+    return true;
+}
+
+bool solveGrid() 
+{
+    for (int row = 0; row < SIZE; row++)
+    {
+        for (int col = 0; col < SIZE; col++)
+        {
+            if (grid[row][col] == 0) 
+            {  
+                for (int num = 1; num <= 9; num++)
+                {
+                    if (isSafe(row, col, num))
+                    {
+                        grid[row][col] = num;
+                        if (solveGrid()) return true;
+                        grid[row][col] = 0; 
+                    }
+                }
+                return false;  
+            }
+        }
+    }
+    return true; 
+}
+
+void setGrid(int hints)
+{
+    srand(time(0));
+    int count = 0;
+
+    while (count < hints)
+    {
+        int row = rand() % SIZE;
+        int col = rand() % SIZE;
+        int num = (rand() % 9) + 1;
+
+        if (grid[row][col] == 0 && isSafe(row, col, num)) 
+        {
+            grid[row][col] = num;
+            count++;
+        }
+    }
+}
+
+void showGrid()
+{
+    for (int i = 0; i < SIZE; i++)
+    {
+        if (i % 3 == 0 && i != 0) cout << "------ ------- ------\n";
+        for (int j = 0; j < SIZE; j++)
+        {
+            if (j % 3 == 0 && j != 0) cout << "| ";
+            if (grid[i][j] == 0) cout << ". ";
+            else cout << grid[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+int main()
+{
+    char ch;
+    cout << "\t\t\t\t\t----SUDOKU SOLVER-----\n";
+    cout << "Select difficulty level:\n e. Easy\n m. Medium\n d. Difficult\n";
+    cin >> ch;
+
+    int hints;
+    if (ch == 'e' || ch == 'E') hints = 40;
+    else if (ch == 'm' || ch == 'M') hints = 32;
+    else hints = 22 ;  
+
+    Grid();
+    setGrid(hints);
+
+    cout << "\nGenerated Sudoku Puzzle:\n";
+    showGrid();
+
+    if (solveGrid())
+    {
+        cout << "\nSolved Sudoku:\n";
+        showGrid();
+    }
+    else 
+    {
+        cout << "\nNo solution exists!\n";
+    }
+
+    return 0;
+}
